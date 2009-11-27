@@ -77,7 +77,7 @@ In app/controller/user_controller.rb
   def login
     if params[:submit]
       if u = User.authenticate(params[:username], params[:password])
-        current_user = u
+        self.current_user = u
         ...
       end
       ...
