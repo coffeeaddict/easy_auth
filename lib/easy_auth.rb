@@ -66,15 +66,21 @@ end
 
 module EasyAuthController
   def self.included(base)
-    class_eval <<-EOC
-      def current_user
-        return nil unless session[:user]
-        return User.find(session[:user])
-      end
-      def current_user=(user)
-        session[:user] = user.id
-      end
-    EOC
+    base.extend ClassMethods
+  end
+
+  module ClassMethods
+    def acts_as_authenticator_for(klass)
+      class_eval <<-EOC
+        def current_user
+          return nil unless session[:user]
+          return #{klass}.find(session[:user])
+        end
+        def current_user=(user)
+          session[:user] = user.id
+        end
+      EOC
+    end
   end
 end
 
