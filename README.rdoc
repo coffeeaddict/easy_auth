@@ -1,0 +1,79 @@
+= EasyAuth
+
+A very simple authentication mechanism for Rails.
+
+Note that authentication != authorisation. This plugin will only give
+you authentication based on username and password. It works well with
+easy_roles which will give you authorisation.
+
+Most off what you want is done for you; 
+
+* passwords are hashed in the database (using SHA512)
+* You can set and retrieve the current_user without editing you application_controller
+* You can find the user by her username and password easily
+
+= Prerequisites
+
+The model that needs authentication MUST have a :username and
+:password attribute which should both be strings
+
+The rails application MUST have an EASY_AUTH_SALT constant which can
+be easily configured in 'config/environment.rb' and filled using 'rake
+secret'
+
+
+= Example
+
+== Make sure you have salty passwords
+
+Just the hash is not enough. We should add a big secret to it.
+
+In config/environment.rb
+
+  ...
+  EASY_AUTH_SALT = "some lengthy secret here (dont change it)"
+  ...
+
+== Make the model authentic
+
+The most likely scenario is naming your model 'User', but that's just
+an example here.
+
+In app/models/user.rb
+
+  class User < ActiveRecord::Base
+    acts_as_authentic
+  end
+
+== And now for some control
+
+User might just want to be able to login, so let's go:
+
+In app/controller/user_controller.rb
+
+  ...
+  def login
+    if params[:submit]
+      if u = User.authenticate(params[:username], params[:password])
+        current_user = u
+        ...
+      end
+      ...
+    end
+    ...
+  end
+  ...
+
+== And perhaps you want the check if there is a current_user
+
+In some other controller
+
+  def update
+    return unless current_user
+    ...
+  end
+
+== Get your own hashes password?
+
+  hash = User.hashed_password("the password")
+
