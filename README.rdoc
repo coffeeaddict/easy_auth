@@ -62,7 +62,7 @@ In app/controller/application_controller.rb
     protect_from_forgery
   
     # Scrub sensitive parameters from your log
-    filter_parameter_logging :password 
+    filter_parameter_logging :password, :new_password, :password_confirm
   
     # the User model is what we want authenticated
     acts_as_authenticator_for User
@@ -95,7 +95,50 @@ In some other controller
     ...
   end
 
+=== Signup
+
+In your user_controller.rb
+
+  def signup
+    ...
+    u = User.new(params[:user])
+    u.save
+    ...
+  end
+
+In app/views/user/signup.erb
+
+  ...
+  <% form_for User.new :url => { :action => "signup" } do |f| %>
+    <%= f.text_field :username %>
+    <%= f.password_field :password %>
+    <%= f.password_field :password_confirm %>
+  <% end %>
+  ...
+
 == Get your own hashes password?
 
   hash = User.hashed_password("the password")
+
+
+== Passwords, new passwords and password confirmation
+
+Your model will be loaded with 2 extra accessors
+
+* :new_password
+* :password_confirm
+
+The password will not be hashed when :password OR :new_password does
+not match :password_confirm. Further more the save will not occur and
+an extra error will be set on your models errors stack.
+
+When you allow the user to update her password you must use
+:new_password, as it is being used in the before_update callback that
+is automagicly introduced in your model
+
+== Acknowledgements
+
+Many thanks to:
+ - Gert van der Spoel from 3Edge Technologies for testdriving.
+   http://github.com/thunder-
 
